@@ -42,6 +42,11 @@
 *.idb
 *.pdb
 
+# Clion files
+*.xml
+clion-log.txt
+*.iml
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd

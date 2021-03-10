@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <pseudocode.h>
 
 void R_value(int var_type, const char *name) {
 	switch(var_type) {
@@ -80,4 +81,13 @@ void push(int type) {
 }
 void mov(int type, const char *src) {
 	printf("\tmov %s, Acc\n", src);
+}
+void gofalse(int label) {
+	printf("\tgofalse .L%d\n", label);
+}
+void gotolabel(int label) {
+	printf("\tgoto .L%d\n", label);
+}
+void mklabel(int label) {
+	printf(".L%d:\n", label);
 }

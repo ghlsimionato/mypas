@@ -1,6 +1,5 @@
 /**@<tokens.h>::**/
-// #define ID 1024
-// #define UINT 1025
+#pragma once
 
 enum {
 	ID = 1024,

@@ -3,11 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <tokens.h>
+#include <mypas.h>
 
-void mypas(void);
-int gettoken(FILE *);
-
-int lookahead;
 FILE *source;
 
 int main(int argc, char const *argv[])
@@ -21,7 +18,7 @@ int main(int argc, char const *argv[])
 		default:
 			if (source == NULL) {
 				fprintf (stderr, 
-					"argv[1]: cannot open... exiting with error status\n", 
+					"%s: cannot open... exiting with error status\n", 
 					argv[1]);
 				exit (-1);
 			}

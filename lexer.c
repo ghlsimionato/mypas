@@ -19,14 +19,30 @@
 
 int column = 1;
 int linenumber = 1;
-void skipspaces(FILE *tape)
+void skipunused(FILE *tape)
 {
-  	int head;
+	int head;
+	_skipspaces:
  	while ( isspace( head = getc(tape) ) )
 	{
 		if (head == '\n') linenumber++;
 	}
-  	ungetc ( head, tape );
+	
+	/** emulates epsilon-transition: **/
+	ungetc ( head, tape );
+
+	/** skip comments **/
+	if ((head = getc(tape) == '{')) {
+		while ((head = getc(tape) != '}') && head != EOF) {
+			/** don't forget comment may contain line feed: **/
+			if (head == '\n') linenumber++;
+		}
+	
+		if (head == '}') {
+			goto _skipspaces;
+		}
+	}
+	
 }
 /* Now we need a predicate function to recognize a string
  * begining with a letter (alpha) followed by zero or more
@@ -39,6 +55,7 @@ void skipspaces(FILE *tape)
  * isalnum(x) returns 1 if x \in [A-Za-z0-9]
  *            returns 0 otherwise
  */
+int lookahead;
 char lexeme[MAXIDLEN+1];
 int isID(FILE *tape)
 {
@@ -286,21 +303,21 @@ int gettoken(FILE *source)
 {
 	int token;
 
-	skipspaces (source);
+	skipunused(source);
 
-	if ( (token = isID (source)) ) return token;
+	if ( (token = isID(source)) ) return token;
 
-	if ( (token = isOCT (source)) ) return token;
+	if ( (token = isOCT(source)) ) return token;
 
-	if ( (token = isHEX (source)) ) return token;
+	if ( (token = isHEX(source)) ) return token;
 
-	if ( (token = isNUM (source)) ) return token;
+	if ( (token = isNUM(source)) ) return token;
 
 	if ( (token = isASGN(source)) ) return token;
 
 	if ( (token = isRELOP(source)) ) return token;
 
-	token = getc (source);
+	token = getc(source);
 
 	return token;
 }

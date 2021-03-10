@@ -1,10 +1,11 @@
 program Teste;
 
-        { Declarative scope }
+	{ Declarative scope }
 	var i, j: integer;
 	    x, y: real;
 	    t, w: double;
 
+	{ Declarative scope }
 	procedure A(i: integer; var x: double);
 		
 		var abacaxi: integer;
@@ -17,6 +18,7 @@ program Teste;
 
 		end;
 
+	{ Declarative scope }
 	function fact(n: integer): integer;
 		
 		{ Imperative scope }

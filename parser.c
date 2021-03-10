@@ -58,7 +58,7 @@ int iscompat(int acc_type, int syn_type)
 }
 
 /*****************************************************************************
- * mypas -> PROGRAM ID ; declarative imperative .
+ * mypas -> PROGRAM ID ';' declarative imperative '.'
  *****************************************************************************/
 void mypas(void)
 {
@@ -127,6 +127,8 @@ int typemod(void)
 		/**/type = BOOL;/**/
 		match(BOOLEAN);
 	}
+
+	return type;
 }
 /****************************************************************************
  * sbrdecl -> { procedure | function }
@@ -135,8 +137,9 @@ void sbrdecl(void)
 { 
 	_sbrdecl_head:
 	switch(lookahead) {
-		case PROCEDURE: procedure(); goto _sbrdecl_head;
-		case FUNCTION: function(); goto _sbrdecl_head;
+		case PROCEDURE: procedure(); goto _sbrdecl_head; break;
+		case FUNCTION: function(); goto _sbrdecl_head; break;
+		default: /** emulate epsilon-transition **/;
 	}
 }
 /****************************************************************************
@@ -210,7 +213,7 @@ int is_first_fact(void)
 }
 void stmt(void)
 {
-	/**/int F_type = 0;/**/
+	/**/int fact_type = 0;/**/
 	switch(lookahead) {
 	case BEGIN:	imperative(); break;
 	case IF: 	ifstmt();  break;
@@ -218,7 +221,7 @@ void stmt(void)
 	case REPEAT: 	rptstmt(); break;
 	default:
 		if (is_first_fact()) {
-			/**/F_type = /**/fact(F_type);
+			/**/fact_type = /**/fact(fact_type);
 		} else {
 			;
 		}
@@ -233,15 +236,15 @@ void ifstmt(void)
 	/**/int expr_type;/**/
 	/**/int elsecount, endifcount;/**/
 	match(IF); /**/expr_type = /**/expr(BOOL); match(THEN);
-	/**/printf("\tgofalse .L%d\n", elsecount = endifcount = labelcount++);/**/
+	/**/gofalse(elsecount = endifcount = labelcount++);/**/
 	stmt();
 	if (lookahead == ELSE) {
 		match(ELSE);
-		/**/printf("\tgoto .L%d\n", endifcount = labelcount++);/**/ 
-		/**/printf(".L%d:\n", elsecount);/**/
+		/**/gotolabel(endifcount = labelcount++);/**/
+		/**/mklabel(elsecount);/**/
 		stmt();
 	}
-	/**/printf(".L%d:\n", endifcount);/**/
+	/**/mklabel(endifcount);/**/
 }
 /*****************************************************************************
  * whlstmt -> WHILE expr DO stmt
@@ -250,24 +253,27 @@ void whlstmt(void)
 {
 	/**/int expr_type, whilelbl, whendlbl;/**/
 	match(WHILE);
-	/**/printf(".L%d:\n", whilelbl = labelcount++);/**/
+	/**/mklabel(whilelbl = labelcount++);/**/
 	/**/expr_type = /**/expr(BOOL);
 	match (DO);
-	/**/printf("\tgofalse .L%d\n", whendlbl = labelcount++);/**/
+	/**/gofalse(whendlbl = labelcount++);/**/
 	stmt();
-	/**/printf(".L%d:\n", whendlbl);/**/
+	/**/gotolabel(whilelbl);/**/
+	/**/mklabel(whendlbl);/**/
 }
 /*****************************************************************************
  * rptstmt -> REPEAT stmt { ; stmt } UNTIL expr
  *****************************************************************************/
 void rptstmt(void)
 {
-	/**/int expr_type;/**/
+	/**/int expr_type, rptlbl;/**/
 	match(REPEAT);
+	/**/mklabel(rptlbl = labelcount++);/**/
 	stmt_head:
 	stmt();
 	if (lookahead == ';') { match(';'); goto stmt_head; }
 	match(UNTIL); /**/expr_type = /**/expr(BOOL);
+	/**/gofalse(rptlbl);/**/
 }
 /*****************************************************************************
  * expr -> smpexpr [ relop smpexpr ]
@@ -281,6 +287,7 @@ int isrelop(void)
 	}
 	return 0;
 }
+
 int expr(int expr_type)
 {
 	/**/int smpexpr1_type, smpexpr2_type;/**/
@@ -290,89 +297,92 @@ int expr(int expr_type)
 	} else {
 		;
 	}
+
+	return expr_type;
 }
+
 /* smpexpr -> ['+''-'] T { (+) T } */
-int smpexpr(int E_type)
+int smpexpr(int smpexpr_type)
 {
-	/**/int signal = 0, oplus; int T_type;/**/
+	/**/int signal = 0, oplus, T_type;/**/
 	if (lookahead == '+' || lookahead == '-') {
 		/**/signal = lookahead;/**/
-		/**/E_type = iscompat(E_type, signal);/**/
+		/**/smpexpr_type = iscompat(smpexpr_type, signal);/**/
 
 		match(lookahead);
 	}
 
-	/**/T_type = /**/term(E_type);
-	/**/E_type = iscompat(E_type, T_type);/**/
-	/**/if (signal == '-') negate(E_type);/**/
+	/**/T_type = /**/term(smpexpr_type);
+	/**/smpexpr_type = iscompat(smpexpr_type, T_type);/**/
+	/**/if (signal == '-') negate(smpexpr_type);/**/
 
 	while ( lookahead == '+' || lookahead == '-' ) { 
 		/**/oplus = lookahead;/**/
-		/**/E_type = iscompat(E_type, oplus);/**/
-		/**/push(E_type);/**/
+		/**/smpexpr_type = iscompat(smpexpr_type, oplus);/**/
+		/**/push(smpexpr_type);/**/
 
-	 	match (lookahead); /**/T_type = /**/term(E_type);
+	 	match(lookahead); /**/T_type = /**/term(smpexpr_type);
 
-		/**/E_type = iscompat(E_type, T_type);/**/
+		/**/smpexpr_type = iscompat(smpexpr_type, T_type);/**/
 
 		/**/
 		switch(oplus) {
 		case '+':
-			add(E_type);
+			add(smpexpr_type);
 			break;
 		default:
-			subtract(E_type);
+			subtract(smpexpr_type);
 		}
 		/**/
 	}
 
-	/**/return E_type;/**/
+	/**/return smpexpr_type;/**/
 }
 
 /* T -> F { (*) F } */
-int term(int T_type)
+int term(int term_type)
 { 
-	/**/int F_type;/**/
+	/**/int fact_type;/**/
 
-	/**/F_type = /**/fact(T_type);
-	/**/T_type = iscompat(T_type, F_type);/**/
+	/**/fact_type = /**/fact(term_type);
+	/**/term_type = iscompat(term_type, fact_type);/**/
 
 	while ( lookahead == '*' || lookahead == '/' ) {
 		/**/int otimes = lookahead;/**/
-		/**/T_type = iscompat(T_type, otimes);/**/
-		/**/push(T_type);/**/
+		/**/term_type = iscompat(term_type, otimes);/**/
+		/**/push(term_type);/**/
 
-		match(lookahead); /**/F_type = /**/fact(T_type);
+		match(lookahead); /**/fact_type = /**/fact(term_type);
 
-		/**/T_type = iscompat(T_type, F_type);/**/
+		/**/term_type = iscompat(term_type, fact_type);/**/
 
 		/**/
 		switch(otimes) {
 		case '*':
-			multiply(T_type);
+			multiply(term_type);
 			break;
 		default:
-			divide(T_type);
+			divide(term_type);
 		}
 		/**/
 	}
 
-	/**/return T_type;/**/
+	/**/return term_type;/**/
 }
 
 /*  F ->  ( expr )
  *      | n
  *      | v [ = expr ] */
 
-int fact(int F_type)
+int fact(int fact_type)
 { 
-	/**/char name[MAXIDLEN+1]; int E_type; int var_descriptor;/**/
+	/**/char name[MAXIDLEN+1]; int smpexpr_type; int var_descriptor;/**/
 	switch (lookahead) {
 		case '(':
-			match('('); /**/E_type = /**/expr(F_type); match(')');
+			match('('); /**/smpexpr_type = /**/expr(fact_type); match(')');
 			break;
 		case UINT:
-			/**/mov(F_type, lexeme);/**/
+			/**/mov(fact_type, lexeme);/**/
 			match(UINT);
 			break;
 		case FLOAT:
@@ -388,13 +398,15 @@ int fact(int F_type)
 			/**/
 			match(ID);
 			if (lookahead == ASGN) {
-				match(ASGN); expr(F_type);
-				/**/L_value(F_type, name);/**/
+				match(ASGN); expr(fact_type);
+				/**/L_value(fact_type, name);/**/
 			} else {
-				/**/R_value(F_type, name);/**/
+				/**/R_value(fact_type, name);/**/
 				;
 			}
 	}
+
+	return fact_type;
 }
 
 void match(int expected)

@@ -2,7 +2,11 @@
 
 #pragma once
 
+#include <stdio.h>
+#include <string.h>
+
 #include <constants.h>
+
 
 typedef struct __symtab__ {
 	char name[MAXIDLEN+1];
@@ -17,5 +21,4 @@ extern int symtab_nextentry;
 int symtab_lookup(const char *);
 
 int symtab_append(const char *);
-
 

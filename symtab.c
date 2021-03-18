@@ -1,5 +1,4 @@
 /**@<symtab.c>::**/
-#include <string.h>
 #include <symtab.h>
 
 SYMTAB symtab[MAXSTBENTRIES];
@@ -18,7 +17,12 @@ int symtab_lookup(const char *query)
 int symtab_append(const char *entry)
 {
 	int i = symtab_lookup(entry);
-	if (i > -1) return -1;
+
+	if (i > -1) {
+		fprintf(stderr, "symtab_append: %s already defined. Fatal error.\n", entry);
+		return -1;
+	}
+
 	strcpy( symtab[symtab_nextentry].name, entry );
 	return symtab_nextentry++;
 }

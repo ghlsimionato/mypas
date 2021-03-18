@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include <string.h>
+
+
 int iskeyword(const char *);
 
 enum {
@@ -30,5 +33,3 @@ enum {
 	FALSE,
 	END,
 };
-
-

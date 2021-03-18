@@ -9,40 +9,43 @@
  * a method to ignore spaces.
  */
 
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
+
 #include <tokens.h>
 #include <constants.h>
 #include <keywords.h>
 #include <lexer.h>
 
-int column = 1;
+
+int lookahead;
+char lexeme[MAXIDLEN+1];
+int column = 1; // TODO: Make column counter
 int linenumber = 1;
+
+/**
+ * Function to skip unused characters
+ * (such as space characters and anything inside a comment block)
+ */
 void skipunused(FILE *tape)
 {
 	int head;
-	_skipspaces:
+	_skipunused:
  	while ( isspace( head = getc(tape) ) )
 	{
 		if (head == '\n') linenumber++;
 	}
-	
-	/** emulates epsilon-transition: **/
-	ungetc ( head, tape );
+	/** Emulates a epsilon-transition: **/
+    ungetc ( head, tape );
 
-	/** skip comments **/
-	if ((head = getc(tape) == '{')) {
-		while ((head = getc(tape) != '}') && head != EOF) {
-			/** don't forget comment may contain line feed: **/
-			if (head == '\n') linenumber++;
-		}
-	
-		if (head == '}') {
-			goto _skipspaces;
-		}
-	}
-	
+    /** Skip comments **/
+	if ( (head = getc(tape)) == '{') {
+        while ( (head = getc(tape)) != '}' && head != EOF) {
+            if (head == '\n') linenumber++;
+        }
+        
+        if (head == '}') {
+            goto _skipunused;
+        }
+    }
 }
 /* Now we need a predicate function to recognize a string
  * begining with a letter (alpha) followed by zero or more
@@ -55,8 +58,6 @@ void skipunused(FILE *tape)
  * isalnum(x) returns 1 if x \in [A-Za-z0-9]
  *            returns 0 otherwise
  */
-int lookahead;
-char lexeme[MAXIDLEN+1];
 int isID(FILE *tape)
 {
 	int i = 0;

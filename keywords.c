@@ -1,4 +1,3 @@
-#include <string.h>
 #include <keywords.h>
 
 char *keyword[] = { 
@@ -36,3 +35,4 @@ int iskeyword(const char *name)
 	}
 	return 0;
 }
+

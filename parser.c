@@ -102,7 +102,9 @@ void varlist(void)
 	_id_head:
 	/**/
 	if (symtab_append(lexeme) < 0) {
-		fprintf(stderr, "symtab_append: %s already defined. Fatal error.\n", lexeme);
+		/* if symtab returns a negative number, then an error has occured and the global
+		*	error flag is raised, and code generation is interrupted
+		*/
 		sem_error = -1;
 	}
 	/**/
@@ -127,7 +129,6 @@ int typemod(void)
 		/**/type = BOOL;/**/
 		match(BOOLEAN);
 	}
-
 	return type;
 }
 /****************************************************************************
@@ -139,7 +140,7 @@ void sbrdecl(void)
 	switch(lookahead) {
 		case PROCEDURE: procedure(); goto _sbrdecl_head; break;
 		case FUNCTION: function(); goto _sbrdecl_head; break;
-		default: /** emulate epsilon-transition **/;
+		default: /** emulates epsilon-transition: **/;
 	}
 }
 /****************************************************************************

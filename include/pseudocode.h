@@ -1,5 +1,7 @@
-/**@<pseudocode.h>::**/
+/**@<symtab.h>::**/
+
 #pragma once
+
 
 void L_value(int, const char *name);
 void R_value(int, const char *name);

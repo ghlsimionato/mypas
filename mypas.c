@@ -8,6 +8,7 @@
 
 FILE *source;
 
+/* TODO: Document this file */
 int main(int argc, char const *argv[])
 {
 	source = fopen (argv[1], "r");

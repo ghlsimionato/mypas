@@ -33,10 +33,8 @@ void skipunused(FILE *tape)
 	{
 		if (head == '\n') linenumber++;
 	}
-	/** Emulates a epsilon-transition: **/
-    ungetc ( head, tape );
 
-    /** Skip comments **/
+	/** Skip comments **/
 	if ( (head = getc(tape)) == '{') {
         while ( (head = getc(tape)) != '}' && head != EOF) {
             if (head == '\n') linenumber++;
@@ -46,6 +44,9 @@ void skipunused(FILE *tape)
             goto _skipunused;
         }
     }
+
+		/** emulates epsilon-transition **/
+		ungetc(head, tape);
 }
 /* Now we need a predicate function to recognize a string
  * begining with a letter (alpha) followed by zero or more
@@ -318,7 +319,9 @@ int gettoken(FILE *source)
 
 	if ( (token = isRELOP(source)) ) return token;
 
-	token = getc(source);
+	lexeme[1] = 0;
+	/* TODO: Document this (aula 23 -> +- 1:24:00) */
+	token = lexeme[0] = getc(source);
 
 	return token;
 }

@@ -1,8 +1,6 @@
 /**@<parser.c>::**/
 
-#include <keywords.h>
-#include <pseudocode.h>
-#include <symtab.h>
+
 #include <parser.h>
 
 /******************************
@@ -25,10 +23,9 @@ enum {
 	FLT32,
 	FLT64,
 };
-#define ILGLTYP	-1
 
  /***************************************************************************************
-  *	   bool  int32  int64  flt32 flt64    +      -      *      /     OR   AND   NOT
+  *				 bool  int32  int64  flt32 flt64    +      -      *      /     OR   AND   NOT
   * bool   bool  -----  -----  ----- -----  -----  -----  -----  -----  bool  bool  bool
   * int32  ----  int32  int64  flt32 flt64  int32  int32  int32  int32  ----  ----  ----
   * int64  ----  int64  int64  flt32 flt64  int64  int64  int64  int64  ----  ----  ----
@@ -60,35 +57,44 @@ int iscompat(int acc_type, int syn_type)
 /*****************************************************************************
  * mypas -> PROGRAM ID ';' declarative imperative '.'
  *****************************************************************************/
+/**/int lex_level = 0;/**/
 void mypas(void)
 {
 	match(PROGRAM);
+	/**/lex_level++;/**/
 	match(ID);
 	match(';');
 	declarative();
 	imperative();
 	match('.');
+	/* exited the PROGRAM keyword, so lex level is decremented */
+	/**/lex_level--;/**/
 }
 /*****************************************************************************
  * declarative -> vardecl sbrdecl
  *****************************************************************************/
 void declarative(void)
 {
-	vardecl(); sbrdecl();
+	int access = 1;
+	vardecl(/**/access/**/);
+	sbrdecl();
 }
+
 /*****************************************************************************
  * vardecl -> [ VAR varlist : typemod ;  { varlist : typemod ; } ]
  *****************************************************************************/
-void vardecl(void)
+void vardecl(/**/int access/**/)
 {
 	if (lookahead == VAR) {
 		match(VAR);
-		/**/int initial_pos = symtab_nextentry;/**/
+		/**/int initial_pos;/**/
+
 		_varlist_head:
-		varlist();
+		/**/initial_pos = symtab_nextentry;/**/
+		varlist(/**/access/**/);
 		match(':');
 		/**/int type = /**/typemod();
-		/**/for( ; initial_pos < symtab_nextentry; initial_pos++){symtab[initial_pos].type = type;}/**/
+		/**/symtab_type_create(initial_pos, type);/**/
 		match(';');
 		if (lookahead == ID) { goto _varlist_head; }
 	}
@@ -97,12 +103,13 @@ void vardecl(void)
  * varlist -> ID { , ID }
  *****************************************************************************/
 /**/int sem_error = 0;/**/
-void varlist(void)
+void varlist(/**/int access/**/)
 {
 	_id_head:
 	/**/
-	if (symtab_append(lexeme) < 0) {
-		/* if symtab returns a negative number, then an error has occured and the global
+	/** varlist is guaranteed to be a variable declaration, so objtype is 1 **/
+	if (symtab_append(lexeme, lex_level, access, 1) < 0) {
+		/* if symtab returns a negative number, then an error has occurred and the global
 		*	error flag is raised, and code generation is interrupted
 		*/
 		sem_error = -1;
@@ -119,17 +126,19 @@ int typemod(void)
 	/**/int type;/**/
 	switch(lookahead) {
 	case INTEGER:
-		/**/type = INT32;	
+		/**/type = INT32;	/**/
+		break;
 	case REAL:
 		/**/type = FLT32;/**/
+		break;
 	case DOUBLE:
 		/**/type = FLT64;/**/
-		match(lookahead); break;
+		break;
 	default:
 		/**/type = BOOL;/**/
-		match(BOOLEAN);
 	}
-	return type;
+	
+	match(lookahead);
 }
 /****************************************************************************
  * sbrdecl -> { procedure | function }
@@ -138,9 +147,14 @@ void sbrdecl(void)
 { 
 	_sbrdecl_head:
 	switch(lookahead) {
-		case PROCEDURE: procedure(); goto _sbrdecl_head; break;
-		case FUNCTION: function(); goto _sbrdecl_head; break;
-		default: /** emulates epsilon-transition: **/;
+		case PROCEDURE:
+			procedure();
+			goto _sbrdecl_head;
+		case FUNCTION:
+			function();
+			goto _sbrdecl_head;
+		default:
+			/** emulates epsilon-transition: **/;
 	}
 }
 /****************************************************************************
@@ -148,35 +162,65 @@ void sbrdecl(void)
  ****************************************************************************/
 void procedure(void)
 {
-	match(PROCEDURE); sbrhead(); match(';'); sbrtail();
+	match(PROCEDURE);
+	/**/lex_level++;/**/
+	sbrhead(2); /** procedures are object type 2 **/
+	match(';');
+	sbrtail();
+	/**/lex_level--;/**/
 }
 /****************************************************************************
  * function -> FUNCTION sbrhead : typemod ; sbrtail
  ****************************************************************************/
 void function(void)
 {
-	match(FUNCTION); sbrhead(); match(':'); typemod(); match(';'); sbrtail();
+	match(FUNCTION);
+	/**/lex_level++;/**/
+	sbrhead(3); /** functions are object type 3 **/
+	match(':');
+	typemod();
+	match(';');
+	sbrtail();
+	/**/lex_level--;/**/
 }
 /*****************************************************************************
  * sbrhead -> ID formparm
  *****************************************************************************/
-void sbrhead(void) { match(ID); formparm(); }
+void sbrhead(/**/int objtype/**/) {
+	/**/symtab_append(lexeme, lex_level, 1, objtype);/**/
+	match(ID);
+	formparm(); /**TODO: pass lex_level**/
+}
 /*****************************************************************************
  * sbrtail -> declarative imperative ;
  *****************************************************************************/
-void sbrtail(void) { declarative(); imperative(); match(';'); }
+void sbrtail(void)
+{
+	declarative();
+	imperative();
+	match(';');
+}
 /*****************************************************************************
  * formparm -> [ ( [VAR] varlist : typemod { ; [VAR] varlist : typemod } ) ]
  *****************************************************************************/
-void formparm(void)
+void formparm(/**/int access/**/)
 {
+	/**/int access, initial_pos, type;/**/
+
 	if (lookahead == '(') {
 		match('(');
 		_parm_head:
-		if (lookahead == VAR) { match(VAR); }
-		varlist();
+		/**/access = 2;/**/
+		/**/initial_pos = symtab_nextentry;/**/
+
+		if (lookahead == VAR) {
+			/**/ access++;/**/
+			match(VAR);
+		}
+		varlist(/**/access/**/);
 		match(':');
-		typemod();
+		/**/type = /**/typemod();
+		/**/symtab_type_create(initial_pos, type);/**/
 		if (lookahead == ';') { match(';'); goto _parm_head; }
 		match(')');
 	}
@@ -289,6 +333,7 @@ int isrelop(void)
 	return 0;
 }
 
+/* AULA 11 diz como gerar código intermediário com relacional (aula do dioa 16 ele começou a fazer) */
 int expr(int expr_type)
 {
 	/**/int smpexpr1_type, smpexpr2_type;/**/
@@ -371,13 +416,27 @@ int term(int term_type)
 	/**/return term_type;/**/
 }
 
+int symtab_check_exist(char const *name) {
+	int i = lex_level, var_descriptor;
+
+	for ( ; i > 0 && (var_descriptor = symtab_lookup(name, i)) < 0; i--) {
+	}
+
+	if (i == 0) {
+		fprintf(stderr, "symtab_lookup: %s not declared\n", name);
+		sem_error = -2;
+	}
+
+	return var_descriptor;
+}
+
 /*  F ->  ( expr )
  *      | n
  *      | v [ = expr ] */
 
 int fact(int fact_type)
 { 
-	/**/char name[MAXIDLEN+1]; int smpexpr_type; int var_descriptor;/**/
+	/**/char name[MAXIDLEN+1]; int smpexpr_type, var_descriptor, i = lex_level;/**/
 	switch (lookahead) {
 		case '(':
 			match('('); /**/smpexpr_type = /**/expr(fact_type); match(')');
@@ -391,14 +450,11 @@ int fact(int fact_type)
 			break;
 		default:
 			/**/strcpy(name, lexeme);/**/
-			/**/
-			if ( (var_descriptor = symtab_lookup(name)) < 0) {
-				fprintf(stderr, "symtab_lookup: %s not declared\n", name);
-				sem_error = -2;
-			}
-			/**/
+			/**/var_descriptor = symtab_check_exist(name);/**/
 			match(ID);
 			if (lookahead == ASGN) {
+				/* TODO: r_value and l_value_type should be used instead of name  */
+				/* var_descriptor determines if variable is global or lex level */
 				match(ASGN); expr(fact_type);
 				/**/L_value(fact_type, name);/**/
 			} else {

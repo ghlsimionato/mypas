@@ -14,7 +14,7 @@ enum {
 	OR,
 	DIV,
 	MOD,
-	PROGRAM,
+	PROGRAM, //
 	PROCEDURE,
 	FUNCTION,
 	VAR,
@@ -32,4 +32,5 @@ enum {
 	TRUE,
 	FALSE,
 	END,
+	RETURN,
 };

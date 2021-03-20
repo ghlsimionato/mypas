@@ -1,7 +1,7 @@
 program Teste;
 
 	{ Declarative scope }
-	var i, j: integer;
+	var i, j, o: integer;
 	    x, y: real;
 	    t, w: double;
 
@@ -19,14 +19,14 @@ program Teste;
 		end;
 
 	{ Declarative scope }
-	function fact(n: integer): integer;
-		
+	function fact(o: integer): integer;
+		var n: integer;
 		{ Imperative scope }
 		begin
 			if n > 2 then
-				fact := n * fact(n - 1)
+				n := n * fact(n - 1)
 			else
-				fact := n
+				n := n
 		end;
 
         { Imperative scope }

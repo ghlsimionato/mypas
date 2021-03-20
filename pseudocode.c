@@ -1,5 +1,28 @@
-#include <stdio.h>
+/**@<pseudocode.c>::**/
+
+
 #include <pseudocode.h>
+
+void negate(int type)
+{
+    switch(type) {
+        case BOOL:
+            printf("\tnotb accb\n");
+            break;
+        case INT32:
+            printf("\tnegl accl\n");
+            break;
+        case INT64:
+            printf("\tnegq accq\n");
+            break;
+        case FLT32:
+            printf("\tnegf accf\n");
+            break;
+        case FLT64:
+            printf("\tnegdf accdf\n");
+            break;
+    }
+}
 
 void R_value(int var_type, const char *name) {
 	switch(var_type) {
@@ -59,6 +82,23 @@ void add(int type) {
 		;
 	}
 }
+
+void divide(int type) {
+    switch(type) {
+        case INT32:
+            printf("\tdivl auxl\n");
+            break;
+        case INT64:
+            printf("\tdivq auxq\n");
+            break;
+        case FLT32:
+            printf("\tdivf auxf\n");
+            break;
+        case FLT64:
+            printf("\tdivdf auxdf\n");
+            break;
+    }
+}
 void subtract(int type) {
 	printf("\tmov Acc, reg\n");
 	printf("\tpop Acc\n");
@@ -68,19 +108,57 @@ void multiply(int type) {
 	printf("\tpop reg\n");
 	printf("\tmul reg, Acc\n");
 }
+/*
 void divide(int type) {
 	printf("\tmov Acc, reg\n");
 	printf("\tpop Acc\n");
 	printf("\tdiv reg, Acc\n");
 }
+*/
+/*
 void negate(int type) {
 	printf("\tnegate Acc\n");
+}
+*/
+void cmp(int relop, int type, char *aux, char *acc) {
+    switch(type) {
+        case BOOL:
+            switch(relop) {
+                case '>':
+                    printf("\taboveb %sb, %sb\n", aux, acc);
+                    break;
+                case '<':
+                    printf("\tbellowb %sb, %sb\n", aux, acc);
+                    break;
+                /*
+                case "==":
+                    break;
+                case "!=":
+                    break;
+                */
+            }
+            break;
+
+            break;
+        case INT32:
+            printf("\tcmpl auxl\n");
+            break;
+        case INT64:
+            printf("\tcmpq auxq\n");
+            break;
+        case FLT32:
+            printf("\tcmpf auxf\n");
+            break;
+        case FLT64:
+            printf("\tcmpdf auxdf\n");
+            break;
+    }
 }
 void push(int type) {
 	printf("\tpush Acc\n");
 }
-void mov(int type, const char *src) {
-	printf("\tmov %s, Acc\n", src);
+void mov(int type, const char *src, const char *dest) {
+	printf("\tmov %s, %s\n", src, dest);
 }
 void gofalse(int label) {
 	printf("\tgofalse .L%d\n", label);

@@ -2,42 +2,63 @@
 
 #include <symtab.h>
 
-SYMTAB symtab[MAXSTBSIZE];
-
-int symtab_nextentry = 0;
-
-int symtab_lookup(const char *query, int lex_level)
+/*********************************
+ * symtab.h::
+ * typedef
+ * struct __symtab__ {
+ *	 char symbol[MAXIDLEN+1];
+ *	 int type;
+ * }
+ * SYMTAB;
+ *********************************/
+SYMTAB symtab[MAXSTBENTRIES];
+int symtab_next_entry = 0;
+int symtab_lookup(const char *symbol)
 {
-	int i;
-	for (i = symtab_nextentry - 1; i > -1 && symtab[i].lex_level == lex_level; i--) {
-		if (strcmp(query, symtab[i].name) == 0) return i;
-	}
-
-	return -1;
+    for (symtab_entry = symtab_next_entry - 1; symtab_entry > -1; symtab_entry--) {
+        if (strcmp(symtab[symtab_entry].symbol, symbol) == 0) return symtab_entry;
+    }
+    return symtab_entry = -1;
 }
-
-int symtab_append(const char *entry, int lex_level, int access, int objtype)
-{
-	int i = symtab_lookup(entry, lex_level);
-
-	if (i > -1) {
-	/** if i is greater than 1, then the symbol has already been declared and an error should be raised **/
-		fprintf(stderr, "symtab_append: %s already defined in lexical level %ds. Fatal error.\n",
-            entry, lex_level);
-		return -1;
-	}
-
-	strcpy( symtab[symtab_nextentry].name, entry );
-	symtab[symtab_nextentry].lex_level = lex_level;
-	symtab[symtab_nextentry].access = access;
-	symtab[symtab_nextentry].objtype = objtype;
-	sprintf(symtab[symtab_nextentry].offset, "%s[%d]", entry, lex_level);
-	return symtab_nextentry++;
+int symtab_entry;
+// int symtab_rtrvtype(const char *symbol, int lexical_level)
+// {
+//     symtab_entry = symtab_lookup(symbol, lexical_level);
+//     if (symtab_entry < 0) {
+//         fprintf(stderr, "symtab_rtrvtype: %s undeclared\n", symbol);
+//         return symtab_entry;
+//     }
+//     return symtab[symtab_entry].type;
+// }
+int symtab_append(const char *symbol, int lexical_level, int objtype, int transp_type) {
+    if ( symtab_lookup(symbol) < 0 || symtab[symtab_entry].lexical_level <= lexical_level) {
+        strcpy(symtab[symtab_next_entry].symbol, symbol);
+        sprintf(symtab[symtab_next_entry].offset, "%s[%d]", symbol, lexical_level);
+        symtab[symtab_next_entry].lexical_level = lexical_level;
+        symtab[symtab_next_entry].objtype = objtype;
+        symtab[symtab_next_entry].transp_type = transp_type;
+        return symtab_next_entry++;
+    } else {
+        fprintf(stderr, "symtab_append: %s multiply defined in current lexical level %d\n", symbol, lexical_level);
+        semantic_error++;
+        return -2;
+    }
 }
-
-void symtab_type_create(int type, int initial_pos)
-{
-		for( ; initial_pos < symtab_nextentry; initial_pos++){
-			symtab[initial_pos].type = type;
-		}
+void symtab_update_type(int start, int type) {
+    int i;
+    for (i = start; i < symtab_next_entry; i++) {
+        symtab[i].type = type;
+        switch(type) {
+            case BOOL:
+                symtab[i].data_size = 1; break;
+            case INT32:
+            case FLT32:
+                symtab[i].data_size = 4; break;
+            case INT64:
+            case FLT64:
+                symtab[i].data_size = 8; break;
+            default:
+                symtab[i].data_size = 0;
+        }
+    }
 }

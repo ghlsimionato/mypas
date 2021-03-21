@@ -2,6 +2,121 @@
 
 #include <parser.h>
 
+/**
+ * this function return a string given token
+ * for logging error messages
+**/
+char* get_token_string(int token) {
+    switch(token) {
+        // Tokens
+        case ID:
+            return "ID";
+            break;
+        case UINT:
+            return "UINT";
+            break;
+        case FLOAT:
+            return "FLOAT";
+            break;
+        case HEX:
+            return "HEX";
+            break;
+        case OCT:
+            return "OCT";
+            break;
+        case ASGN:
+            return "ASGN";
+            break;
+        case GEQ:
+            return "GEQ";
+            break;
+        case LEQ:
+            return "LEQ";
+            break;
+        case NEQ:
+            return "NEQ";
+            break;
+
+        // Keywords
+        case BEGIN:
+            return "BEGIN";
+            break;
+        case NOT:
+            return "NOT";
+            break;
+        case AND:
+            return "AND";
+            break;
+        case OR:
+            return "OR";
+            break;
+        case DIV:
+            return "DIV";
+            break;
+        case MOD:
+            return "MOD";
+            break;
+        case PROGRAM:
+            return "PROGRAM";
+            break;
+        case PROCEDURE:
+            return "PROCEDURE";
+            break;
+        case FUNCTION:
+            return "FUNCTION";
+            break;
+        case VAR:
+            return "VAR";
+            break;
+        case BOOLEAN:
+            return "BOOLEAN";
+            break;
+        case INTEGER:
+            return "INTEGER";
+            break;
+        case REAL:
+            return "REAL";
+            break;
+        case DOUBLE:
+            return "DOUBLE";
+            break;
+        case IF:
+            return "IF";
+            break;
+        case THEN:
+            return "THEN";
+            break;
+        case ELSE:
+            return "ELSE";
+            break;
+        case WHILE:
+            return "WHILE";
+            break;
+        case DO:
+            return "DO";
+            break;
+        case REPEAT:
+            return "REPEAT";
+            break;
+        case UNTIL:
+            return "UNTIL";
+            break;
+        case TRUE:
+            return "TRUE";
+            break;
+        case FALSE:
+            return "FALSE";
+            break;
+        case END:
+            return "END";
+            break;
+        case RETURN:
+            return "RETURN";
+            break;
+        default:
+            return token;
+    }
+}
 /** iscompat table: **/
 /***************************************************************************************************
  *        bool   int32   int64   flt32   flt64     '+'     '-'     '*'     '/'    NOT    OR    AND
@@ -484,8 +599,11 @@ void match(int expected)
     if (lookahead == expected) {
         lookahead = gettoken(source);
     } else {
-        fprintf(stderr, "token mismatch: expected %d whereas found %d\n",
-                expected, lookahead);
+        char *expected_string = get_token_string(expected);
+        char *received_string = get_token_string(lookahead);
+ 
+        fprintf(stderr, "token mismatch on L:%d: expected %s whereas found %s\n",
+                linenumber, expected_string, received_string);
         exit(-2);
     }
 }

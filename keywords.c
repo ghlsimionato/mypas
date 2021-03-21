@@ -1,3 +1,5 @@
+/**@<keywords.c>::**/
+
 #include <keywords.h>
 
 char *keyword[] = { 

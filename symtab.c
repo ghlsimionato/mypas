@@ -30,6 +30,7 @@ int symtab_entry;
 //     }
 //     return symtab[symtab_entry].type;
 // }
+
 int symtab_append(const char *symbol, int lexical_level, int objtype, int transp_type) {
     if ( symtab_lookup(symbol) < 0 || symtab[symtab_entry].lexical_level <= lexical_level) {
         strcpy(symtab[symtab_next_entry].symbol, symbol);
@@ -39,8 +40,10 @@ int symtab_append(const char *symbol, int lexical_level, int objtype, int transp
         symtab[symtab_next_entry].transp_type = transp_type;
         return symtab_next_entry++;
     } else {
+        // symbol has already been delcared and a semantic error is raised
+        // preventing generation of intermediate code
         fprintf(stderr, "symtab_append: %s multiply defined in current lexical level %d\n", symbol, lexical_level);
-        semantic_error++;
+        semantic_error = 1;
         return -2;
     }
 }

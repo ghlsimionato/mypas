@@ -36,5 +36,7 @@ void match(int expected);
 int gettoken(FILE *);
 
 extern int lookahead;
+extern int linenumber;
+extern int column;
 extern char lexeme[];
 extern FILE *source;

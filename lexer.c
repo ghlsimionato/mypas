@@ -31,6 +31,9 @@ void skipunused(FILE *tape)
 		if (head == '\n') linenumber++;
 	}
 
+	/** emulates epsilon-transition **/
+	ungetc(head, tape);
+
 	/** Skip comments **/
 	if ( (head = getc(tape)) == '{') {
         while ( (head = getc(tape)) != '}' && head != EOF) {
@@ -67,7 +70,9 @@ int isID(FILE *tape)
 		ungetc ( lexeme[i], tape );
 		lexeme[i] = 0;
 		int token = iskeyword(lexeme);
-		if (token) return token;
+		if (token) {
+			return token;
+
 		return ID;
 	}
 	ungetc ( lexeme[i], tape );

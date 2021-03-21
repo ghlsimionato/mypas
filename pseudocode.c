@@ -5,6 +5,8 @@
 
 void negate(int type)
 {
+		if (semantic_error) return;
+
     switch(type) {
         case BOOL:
             printf("\tnotb accb\n");
@@ -25,6 +27,8 @@ void negate(int type)
 }
 
 void R_value(int var_type, const char *name) {
+	if (semantic_error) return;
+
 	switch(var_type) {
 	case 2:/** int32 **/
 		printf("\tmovl %s, accl\n", name);
@@ -43,6 +47,8 @@ void R_value(int var_type, const char *name) {
 	}
 }
 void L_value(int var_type, const char *name) {
+	if (semantic_error) return;
+
 	switch(var_type) {
 	case 2:/** int32 **/
 		printf("\tmovl accl, %s\n", name);
@@ -61,6 +67,8 @@ void L_value(int var_type, const char *name) {
 	}
 }
 void add(int type) {
+	if (semantic_error) return;
+
 	switch(type) {
 	case 2:/** int32 **/
 		printf("\tpopl regl\n");
@@ -84,6 +92,8 @@ void add(int type) {
 }
 
 void divide(int type) {
+	if (semantic_error) return;
+
     switch(type) {
         case INT32:
             printf("\tdivl auxl\n");
@@ -100,11 +110,15 @@ void divide(int type) {
     }
 }
 void subtract(int type) {
+	if (semantic_error) return;
+
 	printf("\tmov Acc, reg\n");
 	printf("\tpop Acc\n");
 	printf("\tsub reg, Acc\n");
 }
 void multiply(int type) {
+	if (semantic_error) return;
+
 	printf("\tpop reg\n");
 	printf("\tmul reg, Acc\n");
 }
@@ -121,6 +135,8 @@ void negate(int type) {
 }
 */
 void cmp(int relop, int type, char *aux, char *acc) {
+	if (semantic_error) return;
+
     switch(type) {
         case BOOL:
             switch(relop) {
@@ -155,17 +171,27 @@ void cmp(int relop, int type, char *aux, char *acc) {
     }
 }
 void push(int type) {
+	if (semantic_error) return;
+
 	printf("\tpush Acc\n");
 }
 void mov(int type, const char *src, const char *dest) {
+	if (semantic_error) return;
+
 	printf("\tmov %s, %s\n", src, dest);
 }
 void gofalse(int label) {
+	if (semantic_error) return;
+
 	printf("\tgofalse .L%d\n", label);
 }
 void gotolabel(int label) {
+	if (semantic_error) return;
+
 	printf("\tgoto .L%d\n", label);
 }
 void mklabel(int label) {
+	if (semantic_error) return;
+
 	printf(".L%d:\n", label);
 }

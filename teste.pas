@@ -1,4 +1,4 @@
-program Teste;
+ program Teste;
 
 	{ Declarative scope }
 	var i, j, o: integer;
@@ -14,7 +14,6 @@ program Teste;
 		begin
 			abacaxi := j;
 
-			writeln abacaxi
 
 		end;
 

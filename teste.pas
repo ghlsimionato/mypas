@@ -15,11 +15,12 @@
 			abacaxi := j;
 
 
+
 		end;
 
 	{ Declarative scope }
 	function fact(o: integer): integer;
-		var n: integer;
+		var n, x,: integer;
 		{ Imperative scope }
 		begin
 			if n > 2 then

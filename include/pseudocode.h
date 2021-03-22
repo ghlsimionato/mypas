@@ -1,9 +1,18 @@
 /**@<pseudocode.h>::**/
 
+/******************************************
+ * 
+ * GRUPO 03
+ * Guilherme Henrique Lorenzetti Simionato
+ * Danillo Santos Miranda
+ *
+ *****************************************/
+
 #pragma once
 
 #include <stdio.h>
 
+#include <tokens.h>
 #include <types.h>
 
 extern int semantic_error;

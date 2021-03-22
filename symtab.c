@@ -2,17 +2,21 @@
 
 #include <symtab.h>
 
-/*********************************
- * symtab.h::
- * typedef
- * struct __symtab__ {
- *	 char symbol[MAXIDLEN+1];
- *	 int type;
- * }
- * SYMTAB;
- *********************************/
+/******************************************
+ * 
+ * GRUPO 03
+ * Guilherme Henrique Lorenzetti Simionato
+ * Danillo Santos Miranda
+ *
+ *****************************************/
+
+
 SYMTAB symtab[MAXSTBENTRIES];
 int symtab_next_entry = 0;
+
+/**
+ * Looks up a the given symbol and returns the entry, or -1 if entry is not found
+ */ 
 int symtab_lookup(const char *symbol)
 {
     for (symtab_entry = symtab_next_entry - 1; symtab_entry > -1; symtab_entry--) {
@@ -21,16 +25,12 @@ int symtab_lookup(const char *symbol)
     return symtab_entry = -1;
 }
 int symtab_entry;
-// int symtab_rtrvtype(const char *symbol, int lexical_level)
-// {
-//     symtab_entry = symtab_lookup(symbol, lexical_level);
-//     if (symtab_entry < 0) {
-//         fprintf(stderr, "symtab_rtrvtype: %s undeclared\n", symbol);
-//         return symtab_entry;
-//     }
-//     return symtab[symtab_entry].type;
-// }
 
+/**
+ * Given symbol, lexical level, objtype (if it's a variable procedure or function)
+ * and transp_type (if variable is local, passed as value or as reference), appends
+ * the symbol in symbol table
+ */ 
 int symtab_append(const char *symbol, int lexical_level, int objtype, int transp_type) {
     if ( symtab_lookup(symbol) < 0 || symtab[symtab_entry].lexical_level <= lexical_level) {
         strcpy(symtab[symtab_next_entry].symbol, symbol);

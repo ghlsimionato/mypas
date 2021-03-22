@@ -1,14 +1,12 @@
 /**@<lexer.c>::**/
-// Tue Nov 17 07:55:34 PM -03 2020
-/*
- * this is the start project for lexical analyser to be used
- * as the interface to the parser of the project mybc (my basic
- * calculator).
- *
- * In order to have a pattern scan we have first to implement
- * a method to ignore spaces.
- */
 
+/******************************************
+ * 
+ * GRUPO 03
+ * Guilherme Henrique Lorenzetti Simionato
+ * Danillo Santos Miranda
+ *
+ *****************************************/
 
 #include <lexer.h>
 
@@ -70,8 +68,7 @@ int isID(FILE *tape)
 		ungetc ( lexeme[i], tape );
 		lexeme[i] = 0;
 		int token = iskeyword(lexeme);
-		if (token) {
-			return token;
+		if (token) return token;
 
 		return ID;
 	}

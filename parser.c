@@ -2,10 +2,20 @@
 
 #include <parser.h>
 
+/******************************************
+ * 
+ * GRUPO 03
+ * Guilherme Henrique Lorenzetti Simionato
+ * Danillo Santos Miranda
+ *
+ *****************************************/
+
 /**
  * this function return a string given token
  * for logging error messages
 **/
+/** This variable is used to store the string cast from a char, if the token is a regular ASCII character **/
+char formated_string[2];
 char* get_token_string(int token) {
     switch(token) {
         // Tokens
@@ -114,7 +124,9 @@ char* get_token_string(int token) {
             return "RETURN";
             break;
         default:
-            return token;
+            /* the token is a regular ascii value so we format it into a string */
+            sprintf(formated_string, "%c", token);
+            return formated_string;
     }
 }
 /** iscompat table: **/
@@ -302,9 +314,7 @@ void formparm(void)
         ;
     }
 }
-/*****************************************************************************
- * imperative -> BEGIN stmt { ; stmt } END
- *****************************************************************************/
+
 void imperative(void)
 {
     match(BEGIN);
@@ -313,14 +323,21 @@ void imperative(void)
     if (lookahead == ';') { match(';'); goto stmt_list; }
     match(END);
 }
-/*****************************************************************************
- * stmt -> imperative | ifstmt | whlstmt | rptstmt | fact | <empty>
- *****************************************************************************/
+
+/*  Verifies and parses the pattern of a RETURN statement
+ *
+ *  rtrn -> RETURN expr
+ */
 void rtrn(void)
 {
     match(RETURN); 
     expr(VOID);
 }
+
+/*  Verifies and parses the pattern of an IF statement
+ *
+ *  stmt -> imperative | ifstmt | whlstmt | rptstmt | rtrn | fact 
+ */
 void stmt(void)
 {
     /**/int fact_type;/**/
@@ -345,9 +362,11 @@ void stmt(void)
             ;
     }
 }
-/*****************************************************************************
- * ifstmt -> IF expr THEN stmt [ ELSE stmt ]
- *****************************************************************************/
+
+/*  Verifies and parses the pattern of an IF statement
+ *
+ *  ifstmt -> IF expr THEN stmt [ ELSE stmt ]
+ */
 /**/int loop_count = 1;/**/
 void ifstmt(void)
 {
@@ -367,9 +386,11 @@ void ifstmt(void)
     }
     /**/mklabel(endif_count);/**/
 }
-/*****************************************************************************
- * whlstmt -> WHILE expr DO stmt
- *****************************************************************************/
+
+/*  Verifies and parses the pattern of a WHILE statement
+ *
+ *  whlstmt -> WHILE expr DO stmt
+ */
 void whlstmt(void)
 {
     /**/int expr_type, whlhead, whltail;/**/
@@ -382,9 +403,11 @@ void whlstmt(void)
     /**/gotolabel(whlhead);/**/
     /**/mklabel(whltail);/**/
 }
-/*****************************************************************************
- * rptstmt -> REPEAT stmt { ; stmt } UNTIL expr
- *****************************************************************************/
+
+/*  Verifies and parses the pattern of a REPEAT statement
+ *
+ *  rptstmt -> REPEAT stmt { ; stmt } UNTIL expr
+ */
 void rptstmt(void)
 {
     /**/int expr_type; int replbl;/**/
@@ -396,7 +419,11 @@ void rptstmt(void)
     /**/expr_type = /**/expr(BOOL);
     /**/printf("\tgofalse .L%d\n", replbl);/**/
 }
-/* expr -> smpexpr [ relop smpexpr ] */
+
+/* Verifies and parses the pattern of an expression
+ * 
+ *  expr -> smpexpr [ relop smpexpr ]
+ */
 int isrelop(void)
 {
     switch(lookahead) {
@@ -432,7 +459,11 @@ int expr(int expr_type)
     }
     /**/return expr_type;/**/
 }
-/* smpexpr -> ['+''-'] term { (+) term } */
+
+/*  Verifies and parses the pattern of a SUM expression
+ * 
+ *  smpexpr -> ['+''-'] term { (+) term }
+ */
 int smpexpr(int smpexpr_type) 
 {
     /**/int signal = 0;/**/
@@ -472,7 +503,10 @@ int smpexpr(int smpexpr_type)
     /***/return smpexpr_type;/***/
 }
 
-/* term -> fact { (*) fact } */
+/*  Verifies and parses the pattern of a term
+ *
+ *  term -> fact { (*) fact }
+ */
 int term(int term_type)
 { 
     /***/int fact_type = /***/fact(term_type); /**/term_type = iscompat(term_type, fact_type);/**/
@@ -505,7 +539,9 @@ int term(int term_type)
     /***/return term_type;/***/
 }
 
-/*  fact ->  ( expr )
+/* Verifies and parses the pattern of a factor 
+ * 
+ * fact ->  ( expr )
  *       | n
  *       | v [ = expr ]
  */

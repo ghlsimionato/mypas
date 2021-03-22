@@ -16,6 +16,6 @@ mypas: mypas.o lexer.o parser.o pseudocode.o keywords.o symtab.o
 clean:
 	$(RM) -v *.o
 
-# invokes clean recipe and removes
+# mostlyclean recipe that invokes clean recipe
 mostlyclean: clean
 	$(RM) -v *~

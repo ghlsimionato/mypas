@@ -1,14 +1,21 @@
 /**@<mypas.c>::**/
 
-#include <stdio.h>
-#include <stdlib.h>
+/******************************************
+ * 
+ * GRUPO 03
+ * Guilherme Henrique Lorenzetti Simionato
+ * Danillo Santos Miranda
+ *
+ *****************************************/
 
-#include <tokens.h>
 #include <mypas.h>
 
 FILE *source;
 
-/* TODO: Document this file */
+/**
+ * Main function that calls the starting grammar production (mypas)
+ * for the given filename, which is received as a command line argument
+ */
 int main(int argc, char const *argv[])
 {
 	source = fopen (argv[1], "r");

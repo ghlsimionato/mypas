@@ -1,5 +1,13 @@
 /**@<parser.h>::**/
 
+/******************************************
+ * 
+ * GRUPO 03
+ * Guilherme Henrique Lorenzetti Simionato
+ * Danillo Santos Miranda
+ *
+ *****************************************/
+
 #pragma once
 
 #include <string.h>

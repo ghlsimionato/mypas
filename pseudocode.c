@@ -3,9 +3,17 @@
 
 #include <pseudocode.h>
 
+/******************************************
+ * 
+ * GRUPO 03
+ * Guilherme Henrique Lorenzetti Simionato
+ * Danillo Santos Miranda
+ *
+ *****************************************/
+
 void negate(int type)
 {
-		if (semantic_error) return;
+    if (semantic_error) return;
 
     switch(type) {
         case BOOL:
@@ -30,64 +38,64 @@ void R_value(int var_type, const char *name) {
 	if (semantic_error) return;
 
 	switch(var_type) {
-	case 2:/** int32 **/
-		printf("\tmovl %s, accl\n", name);
-		break;
-	case 3:/** int64 **/
-		printf("\tmovq %s, accq\n", name);
-		break;
-	case 4:/** flt32 **/
-		printf("\tmovf %s, accf\n", name);
-		break;
-	case 5:/** flt64 **/
-		printf("\tmovdf %s, accdf\n", name);
-		break;
-	default:
-		;
+		case INT32:/** int32 **/
+			printf("\tmovl %s, accl\n", name);
+			break;
+		case INT64:/** int64 **/
+			printf("\tmovq %s, accq\n", name);
+			break;
+		case FLT32:/** flt32 **/
+			printf("\tmovf %s, accf\n", name);
+			break;
+		case FLT64:/** flt64 **/
+			printf("\tmovdf %s, accdf\n", name);
+			break;
+		default:
+			;
 	}
 }
 void L_value(int var_type, const char *name) {
 	if (semantic_error) return;
 
 	switch(var_type) {
-	case 2:/** int32 **/
-		printf("\tmovl accl, %s\n", name);
-		break;
-	case 3:/** int64 **/
-		printf("\tmovq accq, %s\n", name);
-		break;
-	case 4:/** flt32 **/
-		printf("\tmovf accf, %s\n", name);
-		break;
-	case 5:/** flt64 **/
-		printf("\tmovdf acdf, %s\n", name);
-		break;
-	default:
-		;
+		case INT32:/** int32 **/
+			printf("\tmovl accl, %s\n", name);
+			break;
+		case INT64:/** int64 **/
+			printf("\tmovq accq, %s\n", name);
+			break;
+		case FLT32:/** flt32 **/
+			printf("\tmovf accf, %s\n", name);
+			break;
+		case FLT64:/** flt64 **/
+			printf("\tmovdf acdf, %s\n", name);
+			break;
+		default:
+			;
 	}
 }
 void add(int type) {
 	if (semantic_error) return;
 
 	switch(type) {
-	case 2:/** int32 **/
-		printf("\tpopl regl\n");
-		printf("\taddl regl, accl\n");
-		break;
-	case 3:/** int64 **/
-		printf("\tpopq regq\n");
-		printf("\taddq regq, accq\n");
-		break;
-	case 4:/** flt32 **/
-		printf("\tpopf regf\n");
-		printf("\taddf regf, accf\n");
-		break;
-	case 5:/** flt64 **/
-		printf("\tpopdf regdf\n");
-		printf("\tadddf regdf, accdf\n");
-		break;
-	default:
-		;
+		case INT32:/** int32 **/
+			printf("\tpopl regl\n");
+			printf("\taddl regl, accl\n");
+			break;
+		case INT64:/** int64 **/
+			printf("\tpopq regq\n");
+			printf("\taddq regq, accq\n");
+			break;
+		case FLT32:/** flt32 **/
+			printf("\tpopf regf\n");
+			printf("\taddf regf, accf\n");
+			break;
+		case FLT64:/** flt64 **/
+			printf("\tpopdf regdf\n");
+			printf("\tadddf regdf, accdf\n");
+			break;
+		default:
+			;
 	}
 }
 
@@ -109,31 +117,56 @@ void divide(int type) {
             break;
     }
 }
+
 void subtract(int type) {
 	if (semantic_error) return;
-
-	printf("\tmov Acc, reg\n");
-	printf("\tpop Acc\n");
-	printf("\tsub reg, Acc\n");
+    
+	switch(type) {
+        case INT32:/** int32 **/
+            printf("\tmovl accl, regl\n");
+            printf("\tpopl accl\n");
+            printf("\tsubl regl, accl\n");
+            break;
+        case INT64:/** int64 **/
+            printf("\tmovq accq, regq\n");
+            printf("\tpopq accq\n");
+            printf("\tsubq regq, accq\n");
+            break;
+        case FLT32:/** flt32 **/
+            printf("\tmovf accf, regf\n");
+            printf("\tpopf accf\n");
+            printf("\tsubf regf, accf\n");
+            break;
+        case FLT64:/** flt64 **/
+            printf("\tmovdf accdf, regdf\n");
+            printf("\tpopdf accdf\n");
+            printf("\tsubdf regdf, accdf\n");
+            break;
+        default:
+            ;
+	}
 }
 void multiply(int type) {
 	if (semantic_error) return;
 
-	printf("\tpop reg\n");
-	printf("\tmul reg, Acc\n");
+    switch(type) {
+        case INT32:/** int32 **/
+            printf("\tmull auxl\n");
+            break;
+        case INT64:/** int64 **/
+            printf("\tmulq auxq\n");
+            break;
+        case FLT32:/** flt32 **/
+            printf("\tmulf auxf\n");
+            break;
+        case FLT64:/** flt64 **/
+            printf("\tmuldf auxdf\n");
+            break;
+        default:
+            ;
+	}
 }
-/*
-void divide(int type) {
-	printf("\tmov Acc, reg\n");
-	printf("\tpop Acc\n");
-	printf("\tdiv reg, Acc\n");
-}
-*/
-/*
-void negate(int type) {
-	printf("\tnegate Acc\n");
-}
-*/
+
 void cmp(int relop, int type, char *aux, char *acc) {
 	if (semantic_error) return;
 
@@ -146,12 +179,18 @@ void cmp(int relop, int type, char *aux, char *acc) {
                 case '<':
                     printf("\tbellowb %sb, %sb\n", aux, acc);
                     break;
-                /*
-                case "==":
+                case '=':
+                    printf("\teqlb %sb, %sb\n", aux, acc);
                     break;
-                case "!=":
+                case GEQ:
+                    printf("\tabveqlb %sb, %sb\n", aux, acc);
                     break;
-                */
+                case LEQ:
+                    printf("\tbelloweqlb %sb, %sb\n", aux, acc);
+                    break;
+                case NEQ:
+                    printf("\tNEQ\n"); // TODO: Implement rest of RELOP
+                    break;
             }
             break;
 
@@ -173,12 +212,42 @@ void cmp(int relop, int type, char *aux, char *acc) {
 void push(int type) {
 	if (semantic_error) return;
 
-	printf("\tpush Acc\n");
+    switch(type) {
+        case INT32:/** int32 **/
+            printf("\tpushl accl\n");
+            break;
+        case INT64:/** int64 **/
+            printf("\tpushq accq\n");
+            break;
+        case FLT32:/** flt32 **/
+            printf("\tpushf accf\n");
+            break;
+        case FLT64:/** flt64 **/
+            printf("\tpushdf accdf\n");
+            break;
+        default:
+            ;
+	}
 }
 void mov(int type, const char *src, const char *dest) {
 	if (semantic_error) return;
 
-	printf("\tmov %s, %s\n", src, dest);
+    switch(type) {
+        case INT32:/** int32 **/
+            printf("\tmovl %s, %s\n", src, dest);
+            break;
+        case INT64:/** int64 **/
+            printf("\tmovq %s, %s\n", src, dest);
+            break;
+        case FLT32:/** flt32 **/
+            printf("\tmovf %s, %s\n", src, dest);;
+            break;
+        case FLT64:/** flt64 **/
+            printf("\tmovdf %s, %s\n", src, dest);
+            break;
+        default:
+            ;
+	}
 }
 void gofalse(int label) {
 	if (semantic_error) return;

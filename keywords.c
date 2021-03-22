@@ -2,6 +2,14 @@
 
 #include <keywords.h>
 
+/******************************************
+ * 
+ * GRUPO 03
+ * Guilherme Henrique Lorenzetti Simionato
+ * Danillo Santos Miranda
+ *
+ *****************************************/
+
 char *keyword[] = { 
 	"begin",
 	"not",
